@@ -3,7 +3,6 @@ import { Jar } from 'jvm';
 
 import { Hook } from './analysis/Hook';
 import { Context } from './analysis/Context';
-import { ClassWrapper } from './analysis/ClassWrapper';
 
 let patchClasses = (jar) => {
   for (let [name, cls] of jar) {
