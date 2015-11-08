@@ -1,0 +1,76 @@
+{
+  "Client": {
+    "after": [ "GameEngine" ],
+    "$match": {
+      "superName": "@GameEngine"
+    }
+  },
+  "DoubleLinkNode": {
+    "after": [ "Node" ],
+    "$match": {
+      "superName": "@Node",
+      "$fieldTypes": 1,
+      "fields": [
+        { "desc": "@self", "count": 0, "op": "gt" }
+      ]
+    }
+  },
+  "GameEngine": {
+    "$match": {
+      "superName": "java/applet/Applet"
+    }
+  },
+  "Node": {
+    "$match": {
+      "superName": "java/lang/Object",
+      "fields": [
+        { "desc": "@self", "count": 2 },
+        { "desc": "J", "count": 1 }
+      ]
+    },
+    "identifies": [
+      { "name": "uid", "type": "field", "$match": {
+        "desc": "J"
+      } }
+    ]
+  },
+  "NPCDefinition": {
+    "after": [ "DoubleLinkNode" ],
+    "$match": {
+      "superName": "@DoubleLinkNode",
+      "fields": [
+        { "desc": "Z", "count": 4, "op": "gte" },
+        { "desc": "Z", "count": 7, "op": "lt" }
+      ]
+    },
+    "identifies": [
+      { "name": "actions", "type": "field", "$match": {
+        "desc": "[Ljava/lang/String;"
+      } },
+      { "name": "name", "type": "field", "$match": {
+        "desc": "Ljava/lang/String;"
+      } }
+    ]
+  },
+  "RSSocket": {
+    "$match": {
+      "fields": [
+        { "desc": "Ljava/net/Socket;", "count": 0, "op": "gt" }
+      ]
+    },
+    "identifies": [
+      { "name": "socket", "type": "field", "$match": {
+        "desc": "Ljava/net/Socket;"
+      } },
+      { "name": "inputStream", "type": "field", "$match": {
+        "desc": "Ljava/io/InputStream;"
+      } },
+      { "name": "outputStream", "type": "field", "$match": {
+        "desc": "Ljava/io/outputStream;"
+      } },
+      { "name": "buffer", "type": "field", "$match": {
+        "desc": "[B"
+      } }
+    ]
+  }
+}

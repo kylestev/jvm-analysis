@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "jvm": "^0.0.9",
+    "lodash": "^3.10.1"
+  },
+  "devDependencies": {
+    "babel": "^5.8.29"
+  }
+}
