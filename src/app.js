@@ -4,6 +4,8 @@ import { Jar } from 'jvm';
 import { Hook } from './analysis/Hook';
 import { Context } from './analysis/Context';
 
+const removeUnusedFields = require('./deob/UnusedFieldRemover').removeUnusedFields;
+
 let patchClasses = (jar) => {
   for (let [name, cls] of jar) {
     cls.fieldTypes = () => {
@@ -26,6 +28,7 @@ let buildHooks = (ctx) => {
 }
 
 Jar.unpack(process.argv[2])
+  .then(removeUnusedFields)
   .then(patchClasses)
   .then((jar) => {
     let ctx = new Context(jar);
