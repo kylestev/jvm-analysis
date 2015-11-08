@@ -16,6 +16,8 @@ let patchClasses = (jar) => {
       return _.find(cls.fields, (f) => f.desc === desc);
     }
   }
+
+  return jar;
 };
 
 let buildHooks = (ctx) => {
@@ -24,9 +26,8 @@ let buildHooks = (ctx) => {
 }
 
 Jar.unpack(process.argv[2])
+  .then(patchClasses)
   .then((jar) => {
-    patchClasses(jar);
-
     let ctx = new Context(jar);
     let hooks = buildHooks(ctx);
 
