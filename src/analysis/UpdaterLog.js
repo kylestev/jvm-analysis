@@ -34,6 +34,33 @@ class UpdaterLog {
     this.end = process.hrtime(this.start);
   }
 
+  toObject() {
+    let obj = {};
+    for (let [identified, name] of this.classes) {
+      obj[identified] = {
+        name: name,
+        fields: (this.fields.get(identified) || []).map((field) => {
+          let desc = field.desc;
+          let arrs = desc.lastIndexOf('[') + 1;
+          desc = desc.slice(arrs);
+          if (desc in TypeMap) {
+            desc = TypeMap[desc];
+          }
+
+          if (desc[0] === 'L') {
+            desc = desc.slice(1).replace(/\//g, '.').slice(0, desc.length - 2);
+          }
+
+          field.desc = desc + _.repeat('[]', arrs);
+
+          return field;
+        })
+      };
+    }
+
+    return obj;
+  }
+
   print() {
     let [elapsedSeconds, elapsedNanos] = this.end;
     let elapsed = (elapsedSeconds + (elapsedNanos / 1000000000));
