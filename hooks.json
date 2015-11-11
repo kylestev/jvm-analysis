@@ -1,4 +1,32 @@
 {
+  "AudioEnvelope": {
+    "$match": {
+      "superName": "java/lang/Object",
+      "$fieldTypes": 2,
+      "fields": [
+        { "desc": "[I", "count": 2 },
+        { "desc": "I", "count": 6, "op": "gt" }
+      ]
+    }
+  },
+  "AudioInstrument": {
+    "after": [ "AudioEnvelope" ],
+    "$match": {
+      "fields": [
+        { "desc": "@AudioEnvelope", "count": 5, "op": "gte" }
+      ]
+    }
+  },
+  "AudioTrack": {
+    "after": [ "AudioInstrument" ],
+    "$match": {
+      "superName": "java/lang/Object",
+      "fields": [
+        { "desc": "I", "count": 2, "op": "gte" },
+        { "desc": "[Lbr;", "count": 0, "op": "gt" }
+      ]
+    }
+  },
   "Client": {
     "after": [ "GameEngine" ],
     "$match": {
