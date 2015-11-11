@@ -35,9 +35,9 @@ class UpdaterLog {
   }
 
   toObject() {
-    let obj = {};
+    let hooks = {};
     for (let [identified, name] of this.classes) {
-      obj[identified] = {
+      hooks[identified] = {
         name: name,
         fields: (this.fields.get(identified) || []).map((field) => {
           let desc = field.desc;
@@ -58,7 +58,15 @@ class UpdaterLog {
       };
     }
 
-    return obj;
+    let [elapsedSeconds, elapsedNanos] = this.end;
+    let elapsed = (elapsedSeconds + (elapsedNanos / 1000000000));
+
+    return {
+      hooks,
+      timeline: [
+        { name: 'Hook Analysis', elapsed: elapsed }
+      ]
+    };
   }
 
   print() {
