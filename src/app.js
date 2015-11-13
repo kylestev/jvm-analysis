@@ -31,20 +31,28 @@ let buildHooks = (ctx) => {
 
 export function analyzeJar(file) {
   return Jar.unpack(file)
-    // .then(removeUnusedFields)
-    .then(patchClasses)
     .then((jar) => {
-      let ctx = new Context(jar);
+      return new Context(jar);
+    })
+    .then((ctx) => {
+      ctx.addTransform('unused_fields', removeUnusedFields);
+      ctx.addTransform('patch_classes', patchClasses);
+      ctx.applyTransforms();
+
+      return ctx;
+    })
+    .then((ctx) => {
       let hooks = buildHooks(ctx);
 
-      ctx.log.record(() => {
+      ctx.log.record('hook_analysis', () => {
         _.each(hooks, (hook) => {
           if ( ! hook.canRun()) {
             console.log(':(', hook.name)
             return;
           }
 
-          for (let [name, cls] of jar) {
+          for (let [name, cls] of ctx.jar) {
+            // console.log(name)
             if (hook.run(cls)) {
               break;
             }
@@ -54,19 +62,29 @@ export function analyzeJar(file) {
 
       return ctx;
     })
-    .then((ctx) => {
-      ctx.log.print();
-      return ctx;
-    });
+    // .then((ctx) => {
+    //   ctx.log.print();
+    //   return ctx;
+    // })
+    .catch(console.error.bind(console));
 }
 
-let app = koa();
-app.use(Router.get('/analyze/:jar', function *(jar) {
-  let path = '/Users/kylestevenson/Downloads/jars/' + jar + '.jar';
-  yield analyzeJar(path, this.request.body)
+let path = process.argv[2];
+if (path) {
+  analyzeJar(path)
     .then((ctx) => {
-      this.body = JSON.stringify(ctx.log.toObject());
+      console.log(ctx.log.toObject());
     });
-}));
+} else {
+  let app = koa();
+  app.use(Router.get('/analyze/:jar', function *(jar) {
+    let path = '/Users/kylestevenson/Downloads/jars/' + jar + '.jar';
+    yield analyzeJar(path)
+      .then((ctx) => {
+        this.body = JSON.stringify(ctx.log.toObject());
+      });
+  }));
 
-app.listen(9001);
+  app.listen(9001);
+  console.log('now ready for connections at: http://localhost:9001');
+}
