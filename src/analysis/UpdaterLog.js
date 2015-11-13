@@ -15,10 +15,9 @@ const TypeMap = {
 
 class UpdaterLog {
   constructor() {
+    this.timers = [];
     this.classes = new Map();
     this.fields = new Map();
-    this.start = 0;
-    this.end = 0;
   }
 
   identifyField(clazz, info) {
@@ -28,10 +27,16 @@ class UpdaterLog {
     this.fields.get(clazz).push(info);
   }
 
-  record(fn) {
-    this.start = process.hrtime();
+  record(name, fn) {
+    let timer = { name };
+    timer.start = process.hrtime();
     fn();
-    this.end = process.hrtime(this.start);
+    timer.end = process.hrtime(timer.start);
+
+    let [elapsedSeconds, elapsedNanos] = timer.end;
+    timer.elapsed = (elapsedSeconds + (elapsedNanos / 1000000000));
+
+    this.timers.push(timer);
   }
 
   toObject() {
@@ -58,18 +63,19 @@ class UpdaterLog {
       };
     }
 
-    let [elapsedSeconds, elapsedNanos] = this.end;
-    let elapsed = (elapsedSeconds + (elapsedNanos / 1000000000));
+    let timeline = _.object(this.timers.map((timer) => {
+      return [ timer.name, timer.elapsed ];
+    }));
 
-    return {
-      hooks,
-      timeline: [
-        { name: 'Hook Analysis', elapsed: elapsed }
-      ]
-    };
+    return { hooks, timeline };
   }
 
   print() {
+    let clsLookup = {};
+    for (let [name, obj] in this.classes) {
+      clsLookup[obj.name] = name;
+    }
+
     let [elapsedSeconds, elapsedNanos] = this.end;
     let elapsed = (elapsedSeconds + (elapsedNanos / 1000000000));
     for (let [identified, name] of this.classes) {
@@ -81,6 +87,8 @@ class UpdaterLog {
         desc = desc.slice(arrs);
         if (desc in TypeMap) {
           desc = TypeMap[desc];
+        } else if (desc in clsLookup) {
+          desc = clsLookup[desc];
         }
 
         if (desc[0] === 'L') {
