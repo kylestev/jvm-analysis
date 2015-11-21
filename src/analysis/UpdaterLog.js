@@ -1,6 +1,6 @@
 import * as _ from 'lodash';
 
-const TypeMap = {
+export const TypeMap = {
   D: 'double',
   J: 'long',
   I: 'int',
